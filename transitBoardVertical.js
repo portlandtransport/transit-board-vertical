@@ -92,6 +92,10 @@ for (var option in query_params.option) {
 		
 // initialize screen margins
 
+
+		
+// initialize screen margins
+
 var body_width 		= options.width || jQuery(window).width();
 var body_height 	= options.height || jQuery(window).height();	
 
@@ -121,20 +125,29 @@ jQuery("body").css('border-color','black');
 jQuery("body").css('border-style','solid');
 jQuery("body").css('position','relative'); // for reasons I haven't figured out, this has to be set late
 
-var top_height = Math.floor(effective_height * split_pct/100);
-var bottom_height = effective_height - top_height;
+var left_width = Math.floor(effective_width * split_pct/100);
+var right_width = effective_width - left_width;
 
 	
 // populate html
 
-var html = '<div id="tb_frames" style="width: ' + effective_width + 'px; height: ' + effective_height + 'px"><iframe id="app_frame" src="'+app_url+'" scrolling="no" style="border:none; margin: 0; float: left; width: ' + effective_width + 'px; height: ' + top_height + 'px; clear: both"></iframe>';
-if (bottom_height > 1) {
-	html += '</iframe><iframe id="suppl_frame" src="' + suppl_url + '" scrolling="no" style="border: none; margin: 0; width: ' + effective_width + 'px; height: ' + bottom_height+'px"></iframe>';
+var html = '<div id="tb_frames" style="position: relative; height: ' + effective_width + 'px; width: ' + effective_height + 'px">';
+
+
+html += '<iframe id="app_frame" src="'+app_url+'" scrolling="no" style="float: left; border:none; margin: 0; height: ' + left_width + 'px; width: ' + effective_height + 'px"></iframe>';
+if (right_width > 1) {
+	html += '<iframe id="suppl_frame" src="' + suppl_url + '" scrolling="no" style="clear: left; border: none; margin: 0; height: ' + right_width + 'px; width: ' + effective_height+'px"></iframe>';
 }
+
 html += '</div>';
 	
 jQuery('body').html(html);
 
-	
+var translate_x = (body_height-body_width) + "px";
+var translate_y = (body_height) + "px";
 
+jQuery("#tb_frames").css("-webkit-transform-origin", "100% 100%").css("-webkit-transform", "rotate(90deg) translateY("+translate_y+") translateX("+translate_x+")");
+
+
+	
 
