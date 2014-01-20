@@ -19,7 +19,7 @@ var transitBoardVertical = {}; // keep state
 // constants
 
 transitBoardVertical.APP_NAME 		= "Transit Board Vertical";
-transitBoardVertical.APP_VERSION 	= "1.00";
+transitBoardVertical.APP_VERSION 	= "1.01";
 transitBoardVertical.APP_ID 			= "tbdvertical";
 
 // assess environment
@@ -141,6 +141,8 @@ jQuery("body").css('position','relative'); // for reasons I haven't figured out,
 var left_width = Math.floor(effective_width * split_pct/100);
 var right_width = effective_width - left_width;
 
+var primary_id = appliance['id']+":A";
+var app_url = "/apps/loader.html?"+primary_id;
 	
 // populate html
 
@@ -150,7 +152,7 @@ html += '<div style="position: relative; float: left; border:none; margin: 0; he
 html += '<iframe id="app_frame1" src="'+app_url+'" scrolling="no" style="position: absolute; float: left; border:none; margin: 0; height: ' + left_width + 'px; width: ' + effective_height + 'px"></iframe>';
 if ( second_page && appliance['id'] ) {
 	var id = appliance['id'];
-	var alt_id = id+":ALT";
+	var alt_id = id+":B";
 	var app_url2 = "/apps/loader.html?"+alt_id;
 	html += '<iframe id="app_frame2" src="'+app_url2+'" scrolling="no" style="position: absolute; float: left; border:none; margin: 0; height: ' + left_width + 'px; width: ' + effective_height + 'px"></iframe>';
 }
@@ -174,9 +176,46 @@ if ( second_page && appliance['id'] ) {
 		setInterval(function(){
 			jQuery("#app_frame1, #app_frame2").toggle(1000);
 		},15000);
-	},60000);
+	},100000);
 }
 
 
+// set up healthcheck/restart logic
+
+var start_time = ((new Date)).getTime();
+
+jQuery.ajax({
+		url: "http://transitappliance.com/cgi-bin/health_update.pl",
+		data: { timestamp: start_time, start_time: start_time, version: 'N/A', "id": appliance['id'], application_id: transitBoardHorizontal.APP_ID, application_name: transitBoardHorizontal.APP_NAME, application_version: transitBoardHorizontal.APP_VERSION, "height": jQuery(window).height(), "width": jQuery(window).width() }
+});
+
+// logging of startup, beat every 30 min goes here
+setInterval(function(){
+	jQuery.ajax({
+			url: "http://transitappliance.com/cgi-bin/health_update.pl",
+			dataType: 'jsonp',
+			cache: false,
+			data: { timestamp: ((new Date)).getTime(), start_time: start_time, version: 'N/A', "id": appliance['id'], application_id: transitBoardHorizontal.APP_ID, application_name: transitBoardHorizontal.APP_NAME, application_version: transitBoardHorizontal.APP_VERSION, "height": jQuery(window).height(), "width": jQuery(window).width() },
+			success: function(data) {
+				if( typeof data != "undefined" && data.reset == true ) {
+					reset_app();
+				}
+			}
+	});
+}, 30*60*1000);
+
+
+var reset_app = function() {
+	if (appliance['id']) {
+		if(typeof trLoader == 'function') {
+			trLoader(appliance['id']);
+		} else {
+			window.location = "http://transitappliance.com/cgi-bin/launch_by_id.pl?id="+appliance['id'];
+		}
+	} else {
+		window.location.reload(true);
+	}
+}
 	
+
 
