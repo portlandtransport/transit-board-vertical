@@ -102,11 +102,15 @@ if (options['second_page'] == 1) {
 	second_page = true;
 }
 
-		
-// initialize screen margins
+var num_pages = options['num_pages'] || 1;
+if (second_page && num_pages < 2) {
+	num_pages = 2;
+}
+num_pages = num_pages * 1;
 
-
+var page_delay = options['page_delay'] || 15;
 		
+	
 // initialize screen margins
 
 var body_width 		= options.width || jQuery(window).width();
@@ -150,11 +154,15 @@ var html = '<div id="tb_frames" style="position: relative; height: ' + effective
 
 html += '<div style="position: relative; float: left; border:none; margin: 0; height: ' + left_width + 'px; width: ' + effective_height + 'px">';
 html += '<iframe id="app_frame1" src="'+app_url+'" scrolling="no" style="position: absolute; float: left; border:none; margin: 0; height: ' + left_width + 'px; width: ' + effective_height + 'px"></iframe>';
-if ( second_page && appliance['id'] ) {
-	var id = appliance['id'];
-	var alt_id = id+":B";
-	var app_url2 = "/apps/loader.html?"+alt_id;
-	html += '<iframe id="app_frame2" src="'+app_url2+'" scrolling="no" style="position: absolute; float: left; border:none; margin: 0; height: ' + left_width + 'px; width: ' + effective_height + 'px"></iframe>';
+if ( num_pages > 1 && appliance['id'] ) {
+	for (var i=2;i<=num_pages;i++) {
+		var letter = ("ABCDEFGHIJKLMNOPQRSTUVWXYZ").substr(i-1,1);
+		//alert(letter);
+		var id = appliance['id'];
+		var alt_id = id+":"+letter;
+		var app_url2 = "/apps/loader.html?"+alt_id;
+		html += '<iframe id="app_frame'+i+'" src="'+app_url2+'" scrolling="no" style="position: absolute; float: left; border:none; margin: 0; height: ' + left_width + 'px; width: ' + effective_height + 'px"></iframe>';
+	}
 }
 html += '</div>';
 if (right_width > 1) {
@@ -170,13 +178,27 @@ var translate_y = (body_height) + "px";
 
 jQuery("#tb_frames").css("-webkit-transform-origin", "100% 100%").css("-webkit-transform", "rotate(90deg) translateY("+translate_y+") translateX("+translate_x+")");
 
-if ( second_page && appliance['id'] ) {
-	setTimeout(function(){
-		jQuery("#app_frame2").css('display','none');
-		setInterval(function(){
-			jQuery("#app_frame1, #app_frame2").toggle(1000);
-		},15000);
-	},100000);
+var current_frame = 0;
+function rotate_frames () {
+	current_frame = current_frame + 1;
+	if (current_frame > num_pages) {
+		current_frame = 1;
+	}
+	//alert(current_frame+" out of "+num_pages);
+	for (var i=1;i<=num_pages;i++) {
+		if (i == current_frame) {
+			//alert( "show "+i);
+			jQuery("#app_frame"+i).show(1000);
+		} else {
+			//alert("hide "+i);
+			jQuery("#app_frame"+i).hide(1000);
+		}
+	}
+	setTimeout(rotate_frames,page_delay*1000);
+}
+
+if ( num_pages > 1 && appliance['id'] ) {
+	setTimeout(rotate_frames,100000); // 100 second delay to let everything load
 }
 
 
@@ -186,7 +208,7 @@ var start_time = ((new Date)).getTime();
 
 jQuery.ajax({
 		url: "http://transitappliance.com/cgi-bin/health_update.pl",
-		data: { timestamp: start_time, start_time: start_time, version: 'N/A', "id": appliance['id'], application_id: transitBoardHorizontal.APP_ID, application_name: transitBoardHorizontal.APP_NAME, application_version: transitBoardHorizontal.APP_VERSION, "height": jQuery(window).height(), "width": jQuery(window).width() }
+		data: { timestamp: start_time, start_time: start_time, version: 'N/A', "id": appliance['id'], application_id: transitBoardVertical.APP_ID, application_name: transitBoardVertical.APP_NAME, application_version: transitBoardVertical.APP_VERSION, "height": jQuery(window).height(), "width": jQuery(window).width() }
 });
 
 // logging of startup, beat every 30 min goes here
@@ -195,7 +217,7 @@ setInterval(function(){
 			url: "http://transitappliance.com/cgi-bin/health_update.pl",
 			dataType: 'jsonp',
 			cache: false,
-			data: { timestamp: ((new Date)).getTime(), start_time: start_time, version: 'N/A', "id": appliance['id'], application_id: transitBoardHorizontal.APP_ID, application_name: transitBoardHorizontal.APP_NAME, application_version: transitBoardHorizontal.APP_VERSION, "height": jQuery(window).height(), "width": jQuery(window).width() },
+			data: { timestamp: ((new Date)).getTime(), start_time: start_time, version: 'N/A', "id": appliance['id'], application_id: transitBoardVertical.APP_ID, application_name: transitBoardVertical.APP_NAME, application_version: transitBoardVertical.APP_VERSION, "height": jQuery(window).height(), "width": jQuery(window).width() },
 			success: function(data) {
 				if( typeof data != "undefined" && data.reset == true ) {
 					reset_app();
