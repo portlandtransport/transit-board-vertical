@@ -19,7 +19,7 @@ var transitBoardVertical = {}; // keep state
 // constants
 
 transitBoardVertical.APP_NAME 		= "Transit Board Vertical";
-transitBoardVertical.APP_VERSION 	= "1.01";
+transitBoardVertical.APP_VERSION 	= "1.02";
 transitBoardVertical.APP_ID 			= "tbdvertical";
 
 // assess environment
@@ -74,6 +74,18 @@ trArrParseQuery = function(qs) {
 		}
 	});
 	return params;
+}
+
+function trArrSupportsCors() {
+  var xhr = new XMLHttpRequest();
+  if ("withCredentials" in xhr) {
+    // Supports CORS
+    return true;
+  } else if (typeof XDomainRequest != "undefined") {
+    // IE
+    return true;
+  }
+  return false;
 }
 
 var query_params = trArrParseQuery();
@@ -206,16 +218,22 @@ if ( num_pages > 1 && appliance['id'] ) {
 
 var start_time = ((new Date)).getTime();
 
+transitBoardVertical.access_method = "jsonp";
+if (trArrSupportsCors()) {
+	transitBoardVertical.access_method = "json";
+}
+
 jQuery.ajax({
-		url: "http://transitappliance.com/cgi-bin/health_update.pl",
+		dataType: transitBoardVertical.access_method,
+		url: "http://ta-web-services.com/cgi-bin/health_update.pl",
 		data: { timestamp: start_time, start_time: start_time, version: 'N/A', "id": appliance['id'], application_id: transitBoardVertical.APP_ID, application_name: transitBoardVertical.APP_NAME, application_version: transitBoardVertical.APP_VERSION, "height": jQuery(window).height(), "width": jQuery(window).width() }
 });
 
 // logging of startup, beat every 30 min goes here
 setInterval(function(){
 	jQuery.ajax({
-			url: "http://transitappliance.com/cgi-bin/health_update.pl",
-			dataType: 'jsonp',
+			url: "http://ta-web-services.com/cgi-bin/health_update.pl",
+			dataType: transitBoardVertical.access_method,
 			cache: false,
 			data: { timestamp: ((new Date)).getTime(), start_time: start_time, version: 'N/A', "id": appliance['id'], application_id: transitBoardVertical.APP_ID, application_name: transitBoardVertical.APP_NAME, application_version: transitBoardVertical.APP_VERSION, "height": jQuery(window).height(), "width": jQuery(window).width() },
 			success: function(data) {
