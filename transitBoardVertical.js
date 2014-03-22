@@ -39,10 +39,11 @@ trArrParseQuery = function(qs) {
 	var q = (typeof qs === 'string'?qs:window.location.search);
 	var params = {};
 	jQuery.each(q.match(/^\??(.*)$/)[1].split('&'),function(i,p){
-		p = unescape(p).replace(/\+/g,' ').replace(/\]/g,'');
+		//p = unescape(p).replace(/\+/g,' ').replace(/\]/g,'');
 		p = p.split('=');
+		p[0] = p[0].replace(/\+/g,' ').replace(/\]/g,'');
 		var keys = p[0].split('[');
-		var value = p[1];
+		var value = unescape(p[1]).replace(/\+/g,' ');
 		var depth = keys.length;
 		if (depth == 1) {
 			// actually shouldn't happen, should always have at least two levels
@@ -135,6 +136,7 @@ var right_border 	= options.right || 0;
 
 var split_pct 		= options.splitpct || 100;
 var suppl_url 		= options.suppl_url;
+var suppl_loc			= options.suppl_loc;
 
 if (suppl_url == "") {
 	suppl_url = "http://transitappliance.com/size_info.html";
@@ -164,21 +166,43 @@ var app_url = "/apps/loader.html?"+primary_id;
 
 var html = '<div id="tb_frames" style="position: relative; height: ' + effective_width + 'px; width: ' + effective_height + 'px">';
 
-html += '<div style="position: relative; float: left; border:none; margin: 0; height: ' + left_width + 'px; width: ' + effective_height + 'px">';
-html += '<iframe id="app_frame1" src="'+app_url+'" scrolling="no" style="position: absolute; float: left; border:none; margin: 0; height: ' + left_width + 'px; width: ' + effective_height + 'px"></iframe>';
-if ( num_pages > 1 && appliance['id'] ) {
-	for (var i=2;i<=num_pages;i++) {
-		var letter = ("ABCDEFGHIJKLMNOPQRSTUVWXYZ").substr(i-1,1);
-		//alert(letter);
-		var id = appliance['id'];
-		var alt_id = id+":"+letter;
-		var app_url2 = "/apps/loader.html?"+alt_id;
-		html += '<iframe id="app_frame'+i+'" src="'+app_url2+'" scrolling="no" style="position: absolute; float: left; border:none; margin: 0; height: ' + left_width + 'px; width: ' + effective_height + 'px"></iframe>';
+
+
+if (suppl_loc == 'bottom') {
+	if (right_width > 1) {
+		html += '<iframe id="suppl_frame" src="' + suppl_url + '" scrolling="no" style="clear: left; border: none; margin: 0; height: ' + right_width + 'px; width: ' + effective_height+'px"></iframe>';
 	}
-}
-html += '</div>';
-if (right_width > 1) {
-	html += '<iframe id="suppl_frame" src="' + suppl_url + '" scrolling="no" style="clear: left; border: none; margin: 0; height: ' + right_width + 'px; width: ' + effective_height+'px"></iframe>';
+	html += '<div style="position: relative; float: left; border:none; margin: 0; height: ' + left_width + 'px; width: ' + effective_height + 'px">';
+	html += '<iframe id="app_frame1" src="'+app_url+'" scrolling="no" style="position: absolute; float: left; border:none; margin: 0; height: ' + left_width + 'px; width: ' + effective_height + 'px"></iframe>';
+	if ( num_pages > 1 && appliance['id'] ) {
+		for (var i=2;i<=num_pages;i++) {
+			var letter = ("ABCDEFGHIJKLMNOPQRSTUVWXYZ").substr(i-1,1);
+			//alert(letter);
+			var id = appliance['id'];
+			var alt_id = id+":"+letter;
+			var app_url2 = "/apps/loader.html?"+alt_id;
+			html += '<iframe id="app_frame'+i+'" src="'+app_url2+'" scrolling="no" style="position: absolute; float: left; border:none; margin: 0; height: ' + left_width + 'px; width: ' + effective_height + 'px"></iframe>';
+		}
+	}
+	html += '</div>';
+
+} else {
+	html += '<div style="position: relative; float: left; border:none; margin: 0; height: ' + left_width + 'px; width: ' + effective_height + 'px">';
+	html += '<iframe id="app_frame1" src="'+app_url+'" scrolling="no" style="position: absolute; float: left; border:none; margin: 0; height: ' + left_width + 'px; width: ' + effective_height + 'px"></iframe>';
+	if ( num_pages > 1 && appliance['id'] ) {
+		for (var i=2;i<=num_pages;i++) {
+			var letter = ("ABCDEFGHIJKLMNOPQRSTUVWXYZ").substr(i-1,1);
+			//alert(letter);
+			var id = appliance['id'];
+			var alt_id = id+":"+letter;
+			var app_url2 = "/apps/loader.html?"+alt_id;
+			html += '<iframe id="app_frame'+i+'" src="'+app_url2+'" scrolling="no" style="position: absolute; float: left; border:none; margin: 0; height: ' + left_width + 'px; width: ' + effective_height + 'px"></iframe>';
+		}
+	}
+	html += '</div>';
+	if (right_width > 1) {
+		html += '<iframe id="suppl_frame" src="' + suppl_url + '" scrolling="no" style="clear: left; border: none; margin: 0; height: ' + right_width + 'px; width: ' + effective_height+'px"></iframe>';
+	}
 }
 
 html += '</div>';
