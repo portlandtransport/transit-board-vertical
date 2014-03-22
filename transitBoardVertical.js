@@ -166,9 +166,7 @@ var app_url = "/apps/loader.html?"+primary_id;
 
 var html = '<div id="tb_frames" style="position: relative; height: ' + effective_width + 'px; width: ' + effective_height + 'px">';
 
-
-
-if (suppl_loc == 'bottom') {
+if (suppl_loc == 'top') {
 	if (right_width > 1) {
 		html += '<iframe id="suppl_frame" src="' + suppl_url + '" scrolling="no" style="clear: left; border: none; margin: 0; height: ' + right_width + 'px; width: ' + effective_height+'px"></iframe>';
 	}
