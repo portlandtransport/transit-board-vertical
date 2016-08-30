@@ -245,10 +245,15 @@ if (trArrSupportsCors()) {
 	transitBoardVertical.access_method = "json";
 }
 
+var platform = "";
+if (typeof options.platform === 'object') {
+	platform = options.platform[0];
+}
+
 jQuery.ajax({
 		dataType: transitBoardVertical.access_method,
 		url: "http://ta-web-services.com/cgi-bin/health_update.pl",
-		data: { timestamp: start_time, start_time: start_time, version: 'N/A', "id": appliance['id'], application_id: transitBoardVertical.APP_ID, application_name: transitBoardVertical.APP_NAME, application_version: transitBoardVertical.APP_VERSION, "height": jQuery(window).height(), "width": jQuery(window).width() }
+		data: { timestamp: start_time, start_time: start_time, version: 'N/A', "id": appliance['id'], application_id: transitBoardVertical.APP_ID, application_name: transitBoardVertical.APP_NAME, application_version: transitBoardVertical.APP_VERSION, "height": jQuery(window).height(), "width": jQuery(window).width(), "platform": platform }
 });
 
 // logging of startup, beat every 30 min goes here
@@ -257,7 +262,7 @@ setInterval(function(){
 			url: "http://ta-web-services.com/cgi-bin/health_update.pl",
 			dataType: transitBoardVertical.access_method,
 			cache: false,
-			data: { timestamp: ((new Date)).getTime(), start_time: start_time, version: 'N/A', "id": appliance['id'], application_id: transitBoardVertical.APP_ID, application_name: transitBoardVertical.APP_NAME, application_version: transitBoardVertical.APP_VERSION, "height": jQuery(window).height(), "width": jQuery(window).width() },
+			data: { timestamp: ((new Date)).getTime(), start_time: start_time, version: 'N/A', "id": appliance['id'], application_id: transitBoardVertical.APP_ID, application_name: transitBoardVertical.APP_NAME, application_version: transitBoardVertical.APP_VERSION, "height": jQuery(window).height(), "width": jQuery(window).width(), "platform": platform },
 			success: function(data) {
 				if( typeof data != "undefined" && data.reset == true ) {
 					reset_app();
